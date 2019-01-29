@@ -9,7 +9,7 @@
 
 int main(int argc, char **argv) {
   // Initialize the ROS system and become a node.
-	ros::init(argc, argv, "publish_velocity");
+	ros::init(argc, argv, "publish_velocityPen");
 	ros::NodeHandle nh;
 
   // Create a publisher object.
@@ -19,8 +19,8 @@ int main(int argc, char **argv) {
 	// Create a client object for the set_pen service.  This
 	// needs to know the data type of the service and its
 	// name.
-	ros::ServiceClient SetPenClient
-		= nh.serviceClient<turtlesim::SetPen>("SetPen");	
+	ros::ServiceClient setpenClient
+		= nh.serviceClient<turtlesim::SetPen>("turtle1/set_pen");	
 	
 	// Set rate to .75 Hz
 	ros::Rate rate(.75);
@@ -31,20 +31,18 @@ int main(int argc, char **argv) {
 	
 	rate.sleep();	
 		
-	// Fill in the request data members.
-	uint8_t(req.r = 200);
-	uint8_t(req.off = 0);
-	ROS_INFO_STREAM("Req:"
-					<< "r=" << req.r
-					<< "off=" << req.off);		
+	// Fill in the request data members, setting red pen and setting width to 3.
+	req.r = 150;
+	req.width = 3;
+		
 	rate.sleep();	
 	
 	// Call the setpen service
-	bool success = SetPenClient.call(req, resp);
+	bool success = setpenClient.call(req, resp);
 	
 	// Check for success
 	if(success) {
-	ROS_INFO_STREAM("Pen is Off");
+	ROS_INFO_STREAM("Pen is Red");
 		}
 	else {
 	ROS_ERROR_STREAM("Failed to set pen");
@@ -110,6 +108,23 @@ int main(int argc, char **argv) {
 	ROS_INFO_STREAM("Sending velocity command:"
 					<< " linear=" << msg.linear.x
 					<< " angular=" << msg.angular.z);
+	
+	// Turning the pen off between initials.
+	req.off = 1;
+		
+	rate.sleep();	
+	
+	// Call the setpen service
+	bool success1 = setpenClient.call(req, resp);
+	
+	// Check for success
+	if(success1) {
+	ROS_INFO_STREAM("Pen is off");
+		}
+	else {
+	ROS_ERROR_STREAM("Failed to set pen");
+	}
+	
 	rate.sleep();
 	msg.linear.x = double(-.785);
 	msg.angular.z = double(1.56);
@@ -156,6 +171,23 @@ int main(int argc, char **argv) {
 	ROS_INFO_STREAM("Sending velocity command:"
 					<< " linear=" << msg.linear.x
 					<< " angular=" << msg.angular.z);
+	
+	// Turning the pen back on.
+	req.off = 0;
+		
+	rate.sleep();	
+	
+	// Call the setpen service
+	bool success2 = setpenClient.call(req, resp);
+	
+	// Check for success
+	if(success2) {
+	ROS_INFO_STREAM("Pen is on");
+		}
+	else {
+	ROS_ERROR_STREAM("Failed to set pen");
+	}
+	
 	rate.sleep();
 	msg.linear.x = double(2.5);
 	msg.angular.z = double(0);
@@ -216,4 +248,44 @@ int main(int argc, char **argv) {
 					<< " linear=" << msg.linear.x
 					<< " angular=" << msg.angular.z);
 	
+	// Turning the pen off at end.
+	req.off = 1;
+		
+	rate.sleep();	
+	
+	// Call the setpen service
+	bool success3 = setpenClient.call(req, resp);
+	
+	// Check for success
+	if(success3) {
+	ROS_INFO_STREAM("Pen is off");
+		}
+	else {
+	ROS_ERROR_STREAM("Failed to set pen");
+	}
+	
+	rate.sleep();
+	msg.linear.x = double(0);
+	msg.angular.z = double(1.57);
+	
+	// Publish the message.
+	pub.publish(msg);	  
+	
+	// Send a message to rosout with the details.
+	ROS_INFO_STREAM("Sending velocity command:"
+					<< " linear=" << msg.linear.x
+					<< " angular=" << msg.angular.z);
+	
+		rate.sleep();
+	msg.linear.x = double(1);
+	msg.angular.z = double(0);
+	
+	// Publish the message.
+	pub.publish(msg);	  
+	
+	// Send a message to rosout with the details.
+	ROS_INFO_STREAM("Sending velocity command:"
+					<< " linear=" << msg.linear.x
+					<< " angular=" << msg.angular.z);
+		
 } // This program was written by Javier Perez Jr. - 1595083
